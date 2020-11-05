@@ -7,13 +7,6 @@ public func configure(_ app: Application) throws {
     // uncomment to serve files from /Public folder
     // app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
 
-//    app.databases.use(.postgres(
-//        hostname: Environment.get("DATABASE_HOST") ?? "localhost",
-//        username: Environment.get("DATABASE_USERNAME") ?? "vapor_username",
-//        password: Environment.get("DATABASE_PASSWORD") ?? "vapor_password",
-//        database: Environment.get("DATABASE_NAME") ?? "vapor_database"
-//    ), as: .psql)
-
     if let databaseURL = Environment.get("DATABASE_URL"), var postgresConfig = PostgresConfiguration(url: databaseURL) {
         postgresConfig.tlsConfiguration = .forClient(certificateVerification: .none)
         app.databases.use(.postgres(
@@ -23,7 +16,18 @@ public func configure(_ app: Application) throws {
         
     }
     
-    app.migrations.add(CreateTodo())
+    app.migrations.add(User.Migration())
+    app.migrations.add(UserToken.Migration())
+    app.migrations.add(User.AddRoleMigration())
+    app.migrations.add(City.Migration())
+    app.migrations.add(CreateUserCityPivot())
+    app.migrations.add(UpdateUserCityDuplicate())
+    app.migrations.add(Promo.Migration())
+    app.migrations.add(CreatePromoCityPivot())
+    app.migrations.add(CreatePromoUserPivot())
+    app.migrations.add(Promo.UpdatePromoStartEnd())
+    app.migrations.add(CheckIn.Migration())
+    app.migrations.add(CheckIn.UpdateFieldToDateTime())
 
     // register routes
     try routes(app)
