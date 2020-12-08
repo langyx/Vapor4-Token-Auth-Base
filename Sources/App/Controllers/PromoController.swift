@@ -17,6 +17,16 @@ struct PromoController: RouteCollection {
         adminPromos.grouped("create").post(use: create)
         adminPromos.grouped("delete").post(use: delete)
         adminPromos.grouped("assign").post(use: assign)
+        adminPromos.grouped("view").post(use: view)
+    }
+    
+    func view(req: Request) throws -> EventLoopFuture<Promo> {
+        let promoView = try req.content.decode(Promo.View.self)
+        return Promo.query(on: req.db)
+            .filter(\.$id == promoView.id)
+            .with(\.$users)
+            .first()
+            .unwrap(or: Abort(.badRequest, reason: "BadPromo"))
     }
     
     func create(req: Request) throws -> EventLoopFuture<Promo> {

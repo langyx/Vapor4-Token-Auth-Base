@@ -13,6 +13,10 @@ extension City {
         var name: String
     }
     
+    struct Get: Content {
+        let id: UUID
+    }
+    
     struct Delete: Content {
         var id: UUID
     }

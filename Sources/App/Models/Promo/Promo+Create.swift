@@ -33,3 +33,9 @@ extension Promo.Delete: Validatable {
     static func validations(_ validations: inout Validations) {
     }
 }
+
+extension Promo {
+    struct View: Content {
+        var id: UUID
+    }
+}

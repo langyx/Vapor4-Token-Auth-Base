@@ -25,11 +25,30 @@ struct CityController: RouteCollection {
         //asign cities to user
         adminCities.grouped("assign").post(use: assign)
         
+        adminCities.grouped("view").post(use: get)
+        
+        adminCities.grouped("all").post(use: all)
+        
+    }
+    
+    func all(req: Request) -> EventLoopFuture<Array<City>> {
+       return City.query(on: req.db)
+            .all()
     }
     
     func index(req: Request) throws -> EventLoopFuture<Array<City>> {
         let user = try req.auth.require(User.self)
         return user.$cities.get(on: req.db)
+    }
+    
+    func get(req: Request) throws -> EventLoopFuture<City> {
+        let getCity = try req.content.decode(City.Get.self)
+        return City.query(on: req.db)
+            .with(\.$users)
+            .with(\.$promos)
+            .filter(\.$id == getCity.id)
+            .first()
+            .unwrap(or: Abort(.badRequest, reason: "BadCity"))
     }
     
     func create(req: Request) throws -> EventLoopFuture<City> {
@@ -66,8 +85,6 @@ struct CityController: RouteCollection {
             }.flatMap { city in
                 return city.delete(on: req.db).map { city }
             }
-            
-        
     }
     
     func assign(req: Request) throws -> EventLoopFuture<User> {
